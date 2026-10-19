@@ -123,3 +123,78 @@ def to_xlsx(ris: Risultato) -> bytes:
     out = io.BytesIO()
     wb.save(out)
     return out.getvalue()
+
+
+def to_xlsx_multiplo(ris_list: list[tuple[str, Risultato]]) -> bytes:
+    """Un unico Excel con: foglio 'Tutti i movimenti', un foglio per estratto, un riepilogo per file."""
+    from openpyxl import load_workbook
+
+    wb = Workbook()
+    tutti = wb.active
+    tutti.title = "Tutti i movimenti"
+    blu = PatternFill("solid", fgColor="1F3A5F")
+    bianco = Font(color="FFFFFF", bold=True)
+    tutti.append(["File", "Banca"] + INTESTAZIONI)
+    for c in tutti[1]:
+        c.fill = blu; c.font = bianco
+    tutti.freeze_panes = "A2"
+    for nome, ris in ris_list:
+        for m in ris.movimenti:
+            tutti.append([nome, ris.banca, m.data, m.data_valuta, m.descrizione, m.categoria,
+                          float(m.importo) if m.importo > 0 else None,
+                          float(-m.importo) if m.importo < 0 else None, float(m.importo)])
+    n = tutti.max_row
+    for r in range(2, n + 1):
+        tutti.cell(r, 3).number_format = "DD/MM/YYYY"
+        tutti.cell(r, 4).number_format = "DD/MM/YYYY"
+        for col in (7, 8, 9):
+            tutti.cell(r, col).number_format = '#,##0.00 €;[Red]-#,##0.00 €'
+    if n > 1:
+        tutti.cell(n + 1, 5, "TOTALI").font = Font(bold=True)
+        for col, L in ((7, "G"), (8, "H"), (9, "I")):
+            c = tutti.cell(n + 1, col, f"=SUM({L}2:{L}{n})")
+            c.font = Font(bold=True); c.number_format = '#,##0.00 €;[Red]-#,##0.00 €'
+    for i, larg in enumerate([22, 16, 12, 12, 60, 28, 14, 14, 14], start=1):
+        tutti.column_dimensions[get_column_letter(i)].width = larg
+    tutti.auto_filter.ref = f"A1:I{max(n, 1)}"
+
+    # riepilogo per file
+    rs = wb.create_sheet("Riepilogo")
+    rs.append(["File", "Banca", "Pagine", "Movimenti", "Saldo iniziale", "Entrate", "Uscite", "Saldo finale", "Quadratura"])
+    for c in rs[1]:
+        c.fill = blu; c.font = bianco
+    for nome, ris in ris_list:
+        q = ris.quadratura
+        rs.append([nome, ris.banca, ris.pagine, len(ris.movimenti),
+                   float(q.saldo_iniziale) if q and q.saldo_iniziale is not None else None,
+                   float(ris.entrate), float(ris.uscite),
+                   float(q.saldo_finale) if q and q.saldo_finale is not None else None,
+                   "OK" if q and q.quadra else ("n/d" if not q or q.quadra is None else "DIFFERENZA")])
+    for row in rs.iter_rows(min_row=2, max_row=rs.max_row):
+        for c in row[4:8]:
+            c.number_format = '#,##0.00 €;[Red]-#,##0.00 €'
+    for i, larg in enumerate([22, 16, 8, 10, 14, 14, 14, 14, 12], start=1):
+        rs.column_dimensions[get_column_letter(i)].width = larg
+
+    # un foglio per estratto (riusa to_xlsx e copia il foglio Movimenti)
+    for nome, ris in ris_list:
+        singolo = load_workbook(io.BytesIO(to_xlsx(ris)))
+        src = singolo["Movimenti"]
+        titolo = nome[:28] or "Estratto"
+        base, k = titolo, 2
+        while titolo in wb.sheetnames:
+            titolo = f"{base[:25]}_{k}"; k += 1
+        dst = wb.create_sheet(titolo)
+        for row in src.iter_rows():
+            for cell in row:
+                nc = dst.cell(cell.row, cell.column, cell.value)
+                nc.number_format = cell.number_format
+                nc.font = cell.font.copy(); nc.fill = cell.fill.copy(); nc.alignment = cell.alignment.copy()
+        for col, dim in src.column_dimensions.items():
+            dst.column_dimensions[col].width = dim.width
+        dst.freeze_panes = src.freeze_panes
+        dst.auto_filter.ref = src.auto_filter.ref
+
+    out = io.BytesIO()
+    wb.save(out)
+    return out.getvalue()

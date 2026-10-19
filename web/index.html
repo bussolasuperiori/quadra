@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quadra — Estratto conto PDF in Excel in 10 secondi</title>
-<meta name="description" content="Converti l'estratto conto PDF della tua banca in Excel o CSV. Movimenti categorizzati, controllo di quadratura automatico, file cancellati subito. Intesa, UniCredit, Fineco, BancoPosta e altre.">
+<title>Quadra — Estratti conto PDF in Excel, con quadratura automatica</title>
+<meta name="description" content="Converti gli estratti conto PDF delle banche italiane in Excel o CSV pronti per la riconciliazione. Movimenti categorizzati, controllo di quadratura, più PDF in un solo file. Per studi commercialisti, contabili e piccole imprese.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
@@ -16,14 +16,15 @@
   *{box-sizing:border-box}
   body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
   header{max-width:1040px;margin:0 auto;padding:22px 20px;display:flex;align-items:center;justify-content:space-between}
-  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:-.02em}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
   .logo i{width:28px;height:28px;border-radius:8px;background:var(--blu);display:inline-grid;place-items:center;color:#fff;font-style:normal;font-family:"JetBrains Mono",monospace;font-size:15px}
   nav a{color:var(--muted);text-decoration:none;margin-left:22px;font-size:15px}
   main{max-width:1040px;margin:0 auto;padding:0 20px 80px}
   .hero{text-align:center;padding:40px 0 28px}
+  .eyebrow{display:inline-block;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blu-2);background:#e8eef7;border-radius:999px;padding:5px 12px;margin-bottom:14px}
   h1{font-size:clamp(30px,5vw,48px);line-height:1.1;letter-spacing:-.03em;margin:0 0 14px}
   h1 em{font-style:normal;color:var(--blu-2)}
-  .sub{font-size:18px;color:var(--muted);max-width:640px;margin:0 auto}
+  .sub{font-size:18px;color:var(--muted);max-width:680px;margin:0 auto}
   .badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
   .badge{font-size:13px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px}
   .drop{margin:26px auto 0;max-width:720px;background:var(--card);border:2px dashed #b9c3d3;border-radius:var(--r);padding:44px 24px;text-align:center;cursor:pointer;transition:.15s}
@@ -47,7 +48,10 @@
   .quad.ok{background:var(--verde-bg);color:var(--verde)}
   .quad.ko{background:var(--rosso-bg);color:var(--rosso)}
   .quad.nd{background:var(--giallo-bg);color:var(--giallo)}
-  .azioni{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+  .azioni{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0;align-items:center}
+  .filetabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 0}
+  .filetabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+  .filetabs button.on{background:var(--blu);color:#fff;border-color:var(--blu)}
   .tab-wrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:520px}
   table{border-collapse:collapse;width:100%;font-size:14px}
   th{position:sticky;top:0;background:#f0f3f8;text-align:left;padding:10px 12px;font-weight:600;border-bottom:1px solid var(--line)}
@@ -56,12 +60,20 @@
   td.neg{color:var(--rosso)} td.pos{color:var(--verde)}
   .cat{font-size:12px;background:#eef1f6;border-radius:6px;padding:2px 7px;white-space:nowrap}
   .avvisi{margin-top:12px;color:var(--giallo);font-size:14px}
+  .segnala{margin-top:10px;font-size:14px;color:var(--muted)}
+  .segnala a{color:var(--blu-2)}
   section.info{margin-top:70px}
   .tre{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:18px}
   .tre div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
   .tre h3{margin:0 0 6px;font-size:16px}
   .tre p{margin:0;color:var(--muted);font-size:14px}
   h2{font-size:26px;letter-spacing:-.02em;margin:0;text-align:center}
+  .lead{text-align:center;color:var(--muted);max-width:640px;margin:8px auto 0}
+  .studio{background:var(--blu);color:#fff;border-radius:16px;padding:34px 28px;margin-top:70px;display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:center}
+  .studio h2{text-align:left;color:#fff;font-size:28px}
+  .studio p{color:#d6e0ee;margin:10px 0 0}
+  .studio ul{margin:14px 0 0;padding-left:18px;color:#d6e0ee}
+  .studio .btn{background:#fff;color:var(--blu)}
   .prezzi{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:18px}
   .piano{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;text-align:center}
   .piano.top{border-color:var(--blu-2);box-shadow:0 0 0 3px #e3ecf8}
@@ -74,32 +86,41 @@
   details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:10px}
   summary{cursor:pointer;font-weight:600}
   details p{color:var(--muted);margin:8px 0 0;font-size:15px}
+  .modal{position:fixed;inset:0;background:rgba(21,33,58,.55);display:none;place-items:center;padding:20px;z-index:10}
+  .modal.on{display:grid}
+  .modal form{background:#fff;border-radius:14px;padding:24px;max-width:460px;width:100%}
+  .modal label{display:block;font-size:13px;color:var(--muted);margin-top:12px}
+  .modal input,.modal textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;margin-top:4px}
+  .modal .chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:12px}
+  .modal .chk input{width:auto;margin:3px 0 0}
   footer{text-align:center;color:var(--muted);font-size:13px;padding:30px 20px;border-top:1px solid var(--line)}
-  @media (max-width:640px){ nav{display:none} .drop{padding:32px 16px} }
+  @media (max-width:720px){ nav{display:none} .drop{padding:32px 16px} .studio{grid-template-columns:1fr;padding:26px 20px} }
 </style>
 </head>
 <body>
 <header>
-  <div class="logo"><i>Q</i> Quadra</div>
-  <nav><a href="#come">Come funziona</a><a href="#prezzi">Prezzi</a><a href="#faq">Privacy e FAQ</a></nav>
+  <a class="logo" href="/"><i>Q</i> Quadra</a>
+  <nav><a href="#come">Come funziona</a><a href="/commercialisti">Per studi</a><a href="#prezzi">Prezzi</a><a href="#faq">Privacy e FAQ</a></nav>
 </header>
 
 <main>
   <section class="hero">
-    <h1>Il tuo estratto conto PDF<br>in <em>Excel</em> in 10 secondi</h1>
-    <p class="sub">Carica il PDF della banca: ottieni i movimenti in tabella, già categorizzati, con il controllo che i saldi tornino. Niente copia-incolla, niente righe perse.</p>
+    <span class="eyebrow">Per studi commercialisti, contabili e piccole imprese</span>
+    <h1>Dall'estratto conto PDF<br>alla <em>riconciliazione</em> in Excel</h1>
+    <p class="sub">Carica uno o più estratti conto: ottieni i movimenti in tabella, categorizzati e con la verifica che saldo iniziale + movimenti = saldo finale. Niente righe perse, niente ricopiature.</p>
     <div class="badges">
-      <span class="badge">🔒 File cancellato subito dopo la conversione</span>
+      <span class="badge">✓ Quadratura al centesimo</span>
+      <span class="badge">📂 Più PDF → un solo Excel</span>
+      <span class="badge">🔒 File cancellati subito</span>
       <span class="badge">🇪🇺 Server in Europa</span>
-      <span class="badge">✓ Controllo di quadratura automatico</span>
     </div>
 
     <div class="drop" id="drop">
-      <input type="file" id="file" accept="application/pdf" hidden>
-      <strong>Trascina qui l'estratto conto PDF</strong>
-      <p>oppure <span style="color:var(--blu-2);text-decoration:underline">scegli il file</span> · max 15 MB · nessuna registrazione per provare</p>
+      <input type="file" id="file" accept="application/pdf" multiple hidden>
+      <strong>Trascina qui gli estratti conto PDF</strong>
+      <p>oppure <span style="color:var(--blu-2);text-decoration:underline">scegli i file</span> · fino a 12 PDF, 15 MB ciascuno · nessuna registrazione per provare</p>
     </div>
-    <p class="esempio">Non hai un PDF a portata di mano? <a href="/campione.pdf" download>Scarica un estratto conto di esempio</a> e caricalo.</p>
+    <p class="esempio">Non hai un PDF a portata di mano? <a href="/campione.pdf" download>Scarica un estratto conto di esempio</a> (Intesa Sanpaolo, 19 pagine, dati fittizi) e caricalo.</p>
     <div class="stato" id="stato"></div>
   </section>
 
@@ -114,91 +135,145 @@
     <div class="azioni">
       <a class="btn" id="dl-xlsx" href="#">⬇ Scarica Excel (.xlsx)</a>
       <a class="btn sec" id="dl-csv" href="#">Scarica CSV</a>
-      <button class="btn sec" id="nuovo">Converti un altro PDF</button>
+      <button class="btn sec" id="nuovo">Converti altri PDF</button>
     </div>
-    <div class="tab-wrap">
+    <div class="filetabs" id="filetabs"></div>
+    <div class="tab-wrap" style="margin-top:10px">
       <table>
         <thead><tr><th>Data</th><th>Descrizione</th><th>Categoria</th><th style="text-align:right">Importo</th></tr></thead>
         <tbody id="righe"></tbody>
       </table>
     </div>
     <div class="avvisi" id="avvisi"></div>
+    <p class="segnala">La tua banca non viene letta bene? <a href="#" id="apri-segnala">Segnalaci il layout</a>: lo aggiungiamo in pochi giorni e ti avvisiamo.</p>
   </section>
 
   <section class="info" id="come">
     <h2>Come funziona</h2>
     <div class="tre">
-      <div><h3>1. Carichi il PDF</h3><p>Va bene l'estratto conto scaricato dall'home banking di qualsiasi banca italiana: Intesa Sanpaolo, UniCredit, BancoPosta, Fineco, BPER, Banco BPM, ING, Revolut, N26 e altre.</p></div>
-      <div><h3>2. Quadra legge e controlla</h3><p>Riconosce date, descrizioni e importi, assegna una categoria a ogni movimento e verifica che saldo iniziale + movimenti = saldo finale. Se qualcosa non torna, te lo dice.</p></div>
-      <div><h3>3. Scarichi Excel o CSV</h3><p>Tabella pulita con colonne Entrate/Uscite, filtri attivi, totali con formule e un foglio di riepilogo per categoria. Pronta per il commercialista o per il tuo budget.</p></div>
+      <div><h3>1. Carichi i PDF</h3><p>Gli estratti conto scaricati dall'home banking di qualsiasi banca italiana: Intesa Sanpaolo, UniCredit, BancoPosta, Fineco, BPER, Banco BPM, ING, Revolut, N26, Trade Republic e altre. Anche un intero anno in una volta.</p></div>
+      <div><h3>2. Quadra legge e controlla</h3><p>Riconosce date, descrizioni e importi, assegna una categoria a ogni movimento e verifica che saldo iniziale + movimenti = saldo finale. Se qualcosa non torna, te lo dice prima che te ne accorga il cliente.</p></div>
+      <div><h3>3. Scarichi Excel o CSV</h3><p>Colonne Entrate/Uscite, filtri attivi, totali con formule, un foglio per estratto e un riepilogo per categoria. Pronto per la riconciliazione, la liquidazione IVA o l'import nel gestionale.</p></div>
+    </div>
+  </section>
+
+  <section class="studio" id="studi">
+    <div>
+      <h2>Fatto per chi lo fa ogni giorno</h2>
+      <p>Uno studio riceve decine di estratti conto al mese, quasi sempre in PDF. Ricopiarli a mano costa ore e genera errori che si scoprono a quadratura fatta.</p>
+      <ul>
+        <li>Riconciliazione bancaria con la certezza che i totali tornino</li>
+        <li>Pratiche di finanziamento e mutuo: estratti del cliente in tabella in pochi secondi</li>
+        <li>Rendiconti per condomìni, associazioni e forfettari</li>
+        <li>Un Excel per cliente, con tutti i trimestri insieme</li>
+      </ul>
+    </div>
+    <div style="text-align:center">
+      <a class="btn" href="/commercialisti">Scopri Quadra per gli studi →</a>
+      <p style="font-size:13px;margin-top:10px">Prova gratuita senza carta di credito</p>
     </div>
   </section>
 
   <section class="info" id="prezzi">
     <h2>Prezzi semplici</h2>
+    <p class="lead">Si paga per pagine convertite, non per utenti. Un estratto trimestrale sono circa 15–20 pagine.</p>
     <div class="prezzi">
-      <div class="piano"><h3>Prova</h3><div class="p">0 €</div><ul><li>5 pagine al mese</li><li>Excel e CSV</li><li>Categorie automatiche</li></ul><a class="btn sec" href="#drop">Prova subito</a></div>
-      <div class="piano top"><h3>Base</h3><div class="p">9 €<span>/mese</span></div><ul><li>100 pagine al mese</li><li>Tutte le banche</li><li>Storico conversioni 30 giorni</li><li>Assistenza via email</li></ul><a class="btn" href="#drop">Inizia</a></div>
-      <div class="piano"><h3>Pro</h3><div class="p">29 €<span>/mese</span></div><ul><li>500 pagine al mese</li><li>Regole di categoria personalizzate</li><li>Export Google Sheets</li><li>Più conti</li></ul><a class="btn sec" href="#drop">Inizia</a></div>
-      <div class="piano"><h3>Studio</h3><div class="p">79 €<span>/mese</span></div><ul><li>2.000 pagine al mese</li><li>Più utenti</li><li>Fatturazione per cliente</li><li>Assistenza prioritaria</li></ul><a class="btn sec" href="#drop">Contattaci</a></div>
+      <div class="piano"><h3>Prova</h3><div class="p">0 €</div><ul><li>30 pagine al mese</li><li>Excel e CSV</li><li>Categorie automatiche</li><li>Quadratura</li></ul><a class="btn sec" href="#drop">Prova subito</a></div>
+      <div class="piano"><h3>Base</h3><div class="p">9 €<span>/mese</span></div><ul><li>200 pagine al mese</li><li>Tutte le banche</li><li>Più PDF in un file</li><li>Assistenza via email</li></ul><a class="btn sec" href="#drop">Inizia</a></div>
+      <div class="piano top"><h3>Studio</h3><div class="p">29 €<span>/mese</span></div><ul><li>1.000 pagine al mese</li><li>Regole di categoria personalizzate</li><li>Export per gestionale (CSV configurabile)</li><li>Nuove banche su richiesta in 5 giorni</li></ul><a class="btn" href="/commercialisti">Richiedi prova estesa</a></div>
+      <div class="piano"><h3>Studio Plus</h3><div class="p">79 €<span>/mese</span></div><ul><li>5.000 pagine al mese</li><li>Più collaboratori</li><li>Archivio conversioni 90 giorni</li><li>Assistenza prioritaria</li></ul><a class="btn sec" href="/commercialisti">Contattaci</a></div>
     </div>
   </section>
 
   <section class="info" id="faq">
     <h2>Privacy e domande frequenti</h2>
-    <details open><summary>Che fine fa il mio estratto conto?</summary><p>Il PDF viene elaborato in memoria e cancellato immediatamente dopo la conversione. Il risultato resta disponibile per il download per 15 minuti, poi sparisce. Non usiamo i tuoi dati per nessun altro scopo e non li cediamo a terzi.</p></details>
-    <details><summary>Funziona con la mia banca?</summary><p>Il motore riconosce il formato della maggior parte degli estratti conto italiani in PDF testuale. Se un layout non viene letto correttamente, segnalacelo: lo aggiungiamo in pochi giorni.</p></details>
+    <details open><summary>Che fine fanno gli estratti conto?</summary><p>Ogni PDF viene elaborato in memoria e cancellato immediatamente dopo la conversione. Il risultato resta disponibile per il download per 15 minuti, poi sparisce. Non conserviamo i documenti, non li usiamo per nessun altro scopo e non li cediamo a terzi. I server sono a Francoforte.</p></details>
+    <details><summary>Funziona con la mia banca?</summary><p>Il motore riconosce il formato della maggior parte degli estratti conto italiani in PDF testuale, ed è verificato riga per riga su layout reali. Se un layout non viene letto correttamente, usa "Segnalaci il layout": lo aggiungiamo in pochi giorni e ti avvisiamo via email.</p></details>
     <details><summary>E se il PDF è una scansione o una foto?</summary><p>Il supporto OCR per le scansioni è in arrivo. Per ora servono i PDF generati dall'home banking (quelli in cui riesci a selezionare il testo).</p></details>
-    <details><summary>Cos'è il controllo di quadratura?</summary><p>Quadra somma tutti i movimenti al saldo iniziale e confronta il risultato con il saldo finale indicato dalla banca. Se i due numeri coincidono, hai la certezza che nessuna riga è andata persa e nessun segno è invertito.</p></details>
+    <details><summary>Cos'è il controllo di quadratura?</summary><p>Quadra somma tutti i movimenti al saldo iniziale e confronta il risultato con il saldo finale indicato dalla banca. Se i due numeri coincidono, hai la certezza che nessuna riga è andata persa e nessun segno è invertito. Se non coincidono, lo vedi subito, con la differenza esatta.</p></details>
+    <details><summary>Posso importare il risultato nel mio gestionale?</summary><p>Il CSV usa il punto e virgola e i decimali con la virgola, come si aspettano i gestionali italiani. Nel piano Studio puoi definire l'ordine e i nomi delle colonne per l'import diretto.</p></details>
   </section>
 </main>
 
-<footer>Quadra · Conversione estratti conto PDF → Excel · <a href="mailto:ciao@quadra.app" style="color:var(--muted)">ciao@quadra.app</a></footer>
+<footer>Quadra · Estratti conto PDF → Excel con quadratura · <a href="mailto:ciao@quadra.app" style="color:var(--muted)">ciao@quadra.app</a></footer>
+
+<div class="modal" id="modal">
+  <form id="form-segnala">
+    <h3 style="margin:0">Segnala un layout non supportato</h3>
+    <p style="color:var(--muted);font-size:14px;margin:6px 0 0">Conserviamo il PDF solo per costruire il modello di lettura della banca, poi lo cancelliamo. Puoi oscurare nome e IBAN prima di inviarlo.</p>
+    <label>PDF dell'estratto conto <input type="file" name="file" accept="application/pdf" required></label>
+    <label>Banca <input type="text" name="banca" placeholder="es. Banca Popolare di Sondrio"></label>
+    <label>La tua email (per avvisarti) <input type="email" name="email" placeholder="nome@studio.it"></label>
+    <label>Note <textarea name="note" rows="2" placeholder="es. legge i movimenti ma sbaglia i segni"></textarea></label>
+    <label class="chk"><input type="checkbox" name="consenso" required> Autorizzo Quadra a conservare questo file per l'analisi del layout.</label>
+    <div class="azioni" style="margin-bottom:0"><button class="btn" type="submit">Invia</button><button class="btn sec" type="button" id="chiudi">Annulla</button></div>
+    <p id="esito" style="font-size:14px;margin:10px 0 0"></p>
+  </form>
+</div>
 
 <script>
 const drop=document.getElementById('drop'),inp=document.getElementById('file'),stato=document.getElementById('stato');
 const fmt=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(n);
+let risultato=null;
 drop.addEventListener('click',()=>inp.click());
 ['dragenter','dragover'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('over')}));
 ['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('over')}));
-drop.addEventListener('drop',ev=>{const f=ev.dataTransfer.files[0];if(f)invia(f)});
-inp.addEventListener('change',()=>{if(inp.files[0])invia(inp.files[0]);inp.value=''});
+drop.addEventListener('drop',ev=>{const f=[...ev.dataTransfer.files];if(f.length)invia(f)});
+inp.addEventListener('change',()=>{if(inp.files.length)invia([...inp.files]);inp.value=''});
 document.getElementById('nuovo').addEventListener('click',()=>{document.getElementById('ris').style.display='none';stato.className='stato';window.scrollTo({top:0,behavior:'smooth'})});
 
-async function invia(file){
-  if(!file.name.toLowerCase().endsWith('.pdf')){stato.className='stato err';stato.textContent='Carica un file PDF.';return}
-  stato.className='stato lav';stato.textContent='Sto leggendo '+file.name+'…';
-  const fd=new FormData();fd.append('file',file);
+async function invia(files){
+  const pdf=files.filter(f=>f.name.toLowerCase().endsWith('.pdf'));
+  if(!pdf.length){stato.className='stato err';stato.textContent='Carica file PDF.';return}
+  if(pdf.length>12){stato.className='stato err';stato.textContent='Massimo 12 PDF per volta.';return}
+  stato.className='stato lav';stato.textContent=pdf.length===1?'Sto leggendo '+pdf[0].name+'…':'Sto leggendo '+pdf.length+' estratti conto…';
+  const fd=new FormData();pdf.forEach(f=>fd.append('file',f));
   try{
     const r=await fetch('/api/converti',{method:'POST',body:fd});
     const j=await r.json();
     if(!r.ok)throw new Error(j.detail||'Errore sconosciuto');
-    mostra(j);stato.className='stato';
-  }catch(e){stato.className='stato err';stato.textContent='Non sono riuscito a convertire il file: '+e.message}
+    risultato=j;mostra(0);stato.className='stato';
+  }catch(e){stato.className='stato err';stato.textContent='Non sono riuscito a convertire: '+e.message}
 }
 
-function mostra(j){
-  document.getElementById('k-banca').textContent=j.banca;
-  document.getElementById('k-n').textContent=j.n_movimenti;
-  document.getElementById('k-e').textContent=fmt(j.entrate);
-  document.getElementById('k-u').textContent=fmt(j.uscite);
-  const q=j.quadratura,qd=document.getElementById('quad');
+function mostra(i){
+  const j=risultato,f=j.file[i];
+  document.getElementById('k-banca').textContent=f.banca;
+  document.getElementById('k-n').textContent=f.n_movimenti;
+  document.getElementById('k-e').textContent=fmt(f.entrate);
+  document.getElementById('k-u').textContent=fmt(f.uscite);
+  const q=f.quadratura,qd=document.getElementById('quad');
   qd.className='quad '+(q&&q.quadra===true?'ok':q&&q.quadra===false?'ko':'nd');
   qd.textContent=(q&&q.quadra===true?'✓ ':q&&q.quadra===false?'✕ ':'• ')+(q?q.messaggio:'');
   document.getElementById('dl-xlsx').href='/api/scarica/'+j.token+'.xlsx';
   document.getElementById('dl-csv').href='/api/scarica/'+j.token+'.csv';
+  document.getElementById('dl-xlsx').textContent=j.n_file>1?'⬇ Scarica Excel unico ('+j.n_file+' estratti)':'⬇ Scarica Excel (.xlsx)';
+  document.getElementById('dl-csv').textContent=j.n_file>1?'Scarica CSV (zip)':'Scarica CSV';
+  const ft=document.getElementById('filetabs');ft.innerHTML='';
+  if(j.n_file>1){j.file.forEach((x,k)=>{const b=document.createElement('button');b.textContent=x.nome_file+(x.quadratura&&x.quadratura.quadra?' ✓':x.quadratura&&x.quadratura.quadra===false?' ✕':'');b.className=k===i?'on':'';b.onclick=()=>mostra(k);ft.appendChild(b)})}
   const tb=document.getElementById('righe');tb.innerHTML='';
-  for(const m of j.movimenti){
+  for(const m of f.movimenti){
     const tr=document.createElement('tr');
     const d=m.data.split('-').reverse().join('/');
     tr.innerHTML=`<td style="white-space:nowrap">${d}</td><td>${esc(m.descrizione)}</td><td><span class="cat">${esc(m.categoria)}</span></td><td class="num ${m.importo<0?'neg':'pos'}">${fmt(m.importo)}</td>`;
     tb.appendChild(tr);
   }
-  document.getElementById('avvisi').innerHTML=(j.avvisi||[]).map(a=>'⚠ '+esc(a)).join('<br>');
+  document.getElementById('avvisi').innerHTML=(f.avvisi||[]).map(a=>'⚠ '+esc(a)).join('<br>');
   document.getElementById('ris').style.display='block';
-  document.getElementById('ris').scrollIntoView({behavior:'smooth',block:'start'});
+  if(i===0)document.getElementById('ris').scrollIntoView({behavior:'smooth',block:'start'});
 }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// segnalazione layout
+const modal=document.getElementById('modal');
+document.getElementById('apri-segnala').addEventListener('click',e=>{e.preventDefault();modal.classList.add('on')});
+document.getElementById('chiudi').addEventListener('click',()=>modal.classList.remove('on'));
+document.getElementById('form-segnala').addEventListener('submit',async e=>{
+  e.preventDefault();const es=document.getElementById('esito');es.textContent='Invio…';
+  try{const r=await fetch('/api/segnala',{method:'POST',body:new FormData(e.target)});const j=await r.json();
+    if(!r.ok)throw new Error(j.detail||'errore');es.style.color='var(--verde)';es.textContent=j.messaggio;setTimeout(()=>{modal.classList.remove('on');es.textContent='';e.target.reset()},2500);
+  }catch(err){es.style.color='var(--rosso)';es.textContent='Invio non riuscito: '+err.message}
+});
 </script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 # Quadra — le uniche cose che toccano a te
 
+> Stato 19/10: sito online su https://quadra-mfai.onrender.com, motore verificato su Intesa e Trade Republic, caricamento multiplo e segnalazione layout attivi. Fase attuale: **validazione con gli studi** (vedi MAIL_COMMERCIALISTI.md). Dominio, pagamenti e P.IVA restano fermi finché non arrivano 2+ risposte positive.
+
 Tutto il resto (codice, test, sito, testi, SEO, assistenza) lo gestisco io.
 Ogni voce qui sotto richiede una persona fisica: un account, una firma o un pagamento.
 

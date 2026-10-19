@@ -1,0 +1,13 @@
+# Deploy con un click su Render (https://render.com): "New +" -> "Blueprint" -> collega il repo.
+services:
+  - type: web
+    name: quadra
+    runtime: docker
+    region: frankfurt          # server in UE, come promesso nella landing
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: QUADRA_MAX_MB
+        value: "15"
+      - key: QUADRA_TTL_SEC
+        value: "900"

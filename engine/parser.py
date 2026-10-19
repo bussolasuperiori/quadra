@@ -1,7 +1,7 @@
 """Parser di estratti conto bancari italiani (PDF testuali).
 
 Architettura:
-- `estrai_righe()` legge il PDF con pdfplumber e raggruppa le parole in righe con coordinate.
+- `estrai_righe()` legge il PDF (pypdfium2, riserva pdfplumber) e raggruppa le parole in righe con coordinate.
 - Un *template di banca* (engine/banche/) può prendere in carico il documento se lo riconosce.
 - Altrimenti lavora il parser generico (`parse_generico`), che:
   1. cerca l'intestazione della tabella per conoscere le colonne Dare/Avere/Saldo;
@@ -21,7 +21,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Optional
 
-import pdfplumber
+from .estrattore import pagine_parole
 
 from .models import Movimento, Risultato
 from .numeri import parse_data, parse_importo, is_data, is_importo, importi_in_testo
@@ -123,9 +123,8 @@ def _crea_riga(parole: list[dict], pagina: int, idx: int) -> Riga:
     return Riga(" ".join(w["text"] for w in parole), parole, parole[0]["top"], pagina, idx)
 
 
-def _righe_pagina(page, pagina_idx: int, start_idx: int, tol: float = 3.0) -> list[Riga]:
-    words = page.extract_words(keep_blank_chars=False, use_text_flow=False, x_tolerance=1.5)
-    words.sort(key=lambda w: (round(w["top"]), w["x0"]))
+def _righe_pagina(words: list[dict], pagina_idx: int, start_idx: int, tol: float = 3.0) -> list[Riga]:
+    words = sorted(words, key=lambda w: (round(w["top"]), w["x0"]))
     righe: list[Riga] = []
     corrente: list[dict] = []
     top_corr: Optional[float] = None
@@ -175,11 +174,11 @@ def unisci_token(parole: list[dict]) -> list[dict]:
 def estrai_righe(percorso: str) -> Documento:
     righe: list[Riga] = []
     testi = []
-    with pdfplumber.open(percorso) as pdf:
-        for pi, page in enumerate(pdf.pages):
-            righe.extend(_righe_pagina(page, pi, len(righe)))
-            testi.append(page.extract_text() or "")
-        n = len(pdf.pages)
+    n = 0
+    for pi, (parole, testo_pagina) in enumerate(pagine_parole(percorso)):
+        righe.extend(_righe_pagina(parole, pi, len(righe)))
+        testi.append(testo_pagina)
+        n = pi + 1
     testo = "\n".join(testi)
     return Documento(righe=righe, testo=testo, pagine=n, banca=rileva_banca(testo))
 

@@ -31,7 +31,7 @@ SEGNALAZIONI_DIR = Path(os.environ.get("QUADRA_SEGNALAZIONI", "/tmp/quadra_segna
 
 WEB = Path(__file__).resolve().parent.parent / "web"
 
-app = FastAPI(title="Quadra API", version="0.3.0")
+app = FastAPI(title="Quadra API", version="0.4.0")
 app.mount("/static", StaticFiles(directory=str(WEB)), name="static")
 
 # token -> (timestamp, [(nome_file, Risultato), ...])
@@ -82,8 +82,10 @@ def _converti_upload(dati: bytes, nome: str) -> Risultato:
 
 
 @app.post("/api/converti")
-async def converti_pdf(file: list[UploadFile] = File(...)):
-    """Accetta uno o più PDF. Risposta: un token unico + un risultato per file."""
+async def converti_pdf(file: list[UploadFile] = File(...), gruppo: str = Form("")):
+    """Accetta uno o più PDF. Risposta: un token unico + un risultato per file.
+    Se `gruppo` è il token di una conversione precedente (non scaduta), i nuovi file
+    vengono aggiunti a quel gruppo: il browser può così inviare un file alla volta."""
     _pulisci()
     if not file:
         raise HTTPException(400, "Carica almeno un file PDF.")
@@ -96,8 +98,13 @@ async def converti_pdf(file: list[UploadFile] = File(...)):
         dati = await f.read()
         risultati.append((Path(f.filename).stem, _converti_upload(dati, f.filename)))
 
-    token = secrets.token_urlsafe(16)
     with _lock:
+        voce = _cache.get(gruppo) if gruppo else None
+        if voce is not None and len(voce[1]) + len(risultati) <= MAX_FILE:
+            token = gruppo
+            risultati = voce[1] + risultati
+        else:
+            token = secrets.token_urlsafe(16)
         _cache[token] = (time.time(), risultati)
 
     corpo = {
@@ -190,3 +197,16 @@ def campione():
     if not p.exists():
         raise HTTPException(404)
     return FileResponse(str(p), media_type="application/pdf", filename="estratto_conto_esempio.pdf")
+
+
+@app.get("/esempio.xlsx")
+def esempio_xlsx():
+    """Excel prodotto dall'estratto di esempio: usato come allegato/link nelle mail di contatto."""
+    p = Path(__file__).resolve().parent.parent / "tests" / "samples" / "reale_intesa_xme.pdf"
+    if not p.exists():
+        raise HTTPException(404)
+    return Response(
+        to_xlsx(converti(str(p))),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="Esempio_Quadra_estratto_Intesa.xlsx"'},
+    )

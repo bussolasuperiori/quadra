@@ -226,14 +226,34 @@ async function invia(files){
   const pdf=files.filter(f=>f.name.toLowerCase().endsWith('.pdf'));
   if(!pdf.length){stato.className='stato err';stato.textContent='Carica file PDF.';return}
   if(pdf.length>12){stato.className='stato err';stato.textContent='Massimo 12 PDF per volta.';return}
-  stato.className='stato lav';stato.textContent=pdf.length===1?'Sto leggendo '+pdf[0].name+'…':'Sto leggendo '+pdf.length+' estratti conto…';
-  const fd=new FormData();pdf.forEach(f=>fd.append('file',f));
-  try{
-    const r=await fetch('/api/converti',{method:'POST',body:fd});
-    const j=await r.json();
-    if(!r.ok)throw new Error(j.detail||'Errore sconosciuto');
-    risultato=j;mostra(0);stato.className='stato';
-  }catch(e){stato.className='stato err';stato.textContent='Non sono riuscito a convertire: '+e.message}
+  risultato=null;let gruppo='';const errori=[];
+  for(let k=0;k<pdf.length;k++){
+    const f=pdf[k];
+    stato.className='stato lav';
+    stato.textContent=(pdf.length>1?`[${k+1}/${pdf.length}] `:'')+'Sto leggendo '+f.name+'… '+(k===0?'(la prima conversione può richiedere fino a 30 secondi)':'');
+    const fd=new FormData();fd.append('file',f);if(gruppo)fd.append('gruppo',gruppo);
+    try{
+      const j=await chiama(fd);
+      risultato=j;gruppo=j.token;
+    }catch(e){errori.push(f.name+': '+e.message)}
+  }
+  if(risultato){mostra(0);stato.className='stato'}
+  if(errori.length){stato.className='stato err';stato.innerHTML='Non sono riuscito a convertire:<br>'+errori.map(esc).join('<br>')}
+  else stato.className='stato';
+}
+async function chiama(fd,tentativo=1){
+  let r;
+  try{r=await fetch('/api/converti',{method:'POST',body:fd})}
+  catch(e){throw new Error('connessione interrotta, riprova tra qualche secondo')}
+  const testo=await r.text();
+  let j=null;try{j=JSON.parse(testo)}catch(_){}
+  if(r.ok&&j)return j;
+  if(j&&j.detail)throw new Error(j.detail);
+  if((r.status===502||r.status===503||r.status===504)&&tentativo<3){
+    stato.textContent='Il server si sta riavviando, riprovo… ('+tentativo+')';
+    await new Promise(res=>setTimeout(res,8000));return chiama(fd,tentativo+1);
+  }
+  throw new Error('il server non ha risposto (errore '+r.status+'). Riprova tra un minuto.');
 }
 
 function mostra(i){

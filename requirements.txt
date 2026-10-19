@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 python-multipart
+pypdfium2
 pdfplumber
 openpyxl
 reportlab

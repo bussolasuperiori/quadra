@@ -4,10 +4,20 @@ services:
     name: quadra
     runtime: docker
     region: frankfurt          # server in UE, come promesso nella landing
-    plan: free
+    plan: free                 # per le campagne Ads passare a "starter" (niente spin-down)
     healthCheckPath: /health
     envVars:
       - key: QUADRA_MAX_MB
         value: "15"
       - key: QUADRA_TTL_SEC
         value: "900"
+      - key: QUADRA_FREE_PAGES
+        value: "30"            # pagine gratuite al mese per visitatore (0 = illimitato)
+      - key: QUADRA_BASE_URL
+        value: "https://quadra-mfai.onrender.com"
+      - key: QUADRA_ADMIN_KEY
+        generateValue: true    # Render genera una chiave: si legge in Dashboard -> Environment
+      # Tracciamento Google Ads / GA4: impostare in Dashboard -> Environment quando l'account esiste
+      # - key: QUADRA_GTAG_ID         es. AW-123456789
+      # - key: QUADRA_ADS_CONVERSION  es. AW-123456789/AbCdEfGhIjK
+      # - key: QUADRA_WEBHOOK_URL     opzionale: riceve ogni evento (lista d'attesa, segnalazioni)

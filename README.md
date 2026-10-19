@@ -38,6 +38,17 @@ In alternativa il `Dockerfile` funziona su Railway, Fly.io o qualsiasi VPS.
 
 I PDF in `tests/samples/reale_*.pdf` sono copie **anonimizzate** di estratti reali (nomi, IBAN, importi e saldi sostituiti con `tests/anonimizza.py`, quadratura ricalcolata).
 
+## Variabili d'ambiente
+| Variabile | Default | Uso |
+|---|---|---|
+| `QUADRA_FREE_PAGES` | 30 | pagine gratuite/mese per visitatore (0 = illimitato) |
+| `QUADRA_ADMIN_KEY` | — | abilita `/api/admin/riepilogo?chiave=` |
+| `QUADRA_GTAG_ID` | — | Google tag (Ads/GA4); senza, nessun tracciamento |
+| `QUADRA_ADS_CONVERSION` | — | etichetta conversione Ads inviata su `conversione_ok` |
+| `QUADRA_WEBHOOK_URL` | — | POST JSON di ogni evento (lista d'attesa, segnalazioni) |
+| `QUADRA_DATA_DIR` | /tmp/quadra_data | uso mensile ed eventi (effimero su Render free) |
+| `QUADRA_BASE_URL` | https://quadra-mfai.onrender.com | per sitemap e canonical |
+
 ## Privacy by design
 - Il PDF viene salvato in un file temporaneo, letto e cancellato subito.
 - Il risultato resta in memoria 15 minuti (TTL) solo per permettere il download.

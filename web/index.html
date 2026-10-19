@@ -39,6 +39,8 @@
   .stato{margin:18px auto 0;max-width:720px;display:none;padding:14px 16px;border-radius:12px;font-size:15px}
   .stato.lav{display:block;background:#eef3fa;color:var(--blu)}
   .stato.err{display:block;background:var(--rosso-bg);color:var(--rosso)}
+  .attesa{margin:12px auto 0;max-width:720px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center}
+  .quota{font-size:13px;color:var(--muted);margin-top:8px}
   #ris{display:none;margin-top:30px}
   .griglia{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
   .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
@@ -100,7 +102,7 @@
 <body>
 <header>
   <a class="logo" href="/"><i>Q</i> Quadra</a>
-  <nav><a href="#come">Come funziona</a><a href="/commercialisti">Per studi</a><a href="#prezzi">Prezzi</a><a href="#faq">Privacy e FAQ</a></nav>
+  <nav><a href="#come">Come funziona</a><a href="/banche">Banche</a><a href="/commercialisti">Per studi</a><a href="#prezzi">Prezzi</a><a href="#faq">Privacy e FAQ</a></nav>
 </header>
 
 <main>
@@ -122,6 +124,16 @@
     </div>
     <p class="esempio">Non hai un PDF a portata di mano? <a href="/campione.pdf" download>Scarica un estratto conto di esempio</a> (Intesa Sanpaolo, 19 pagine, dati fittizi) e caricalo.</p>
     <div class="stato" id="stato"></div>
+    <form class="attesa" id="attesa" style="display:none">
+      <strong>Ti serve più di 30 pagine al mese?</strong>
+      <p style="margin:4px 0 10px;color:var(--muted);font-size:14px">Il piano Base (200 pagine, 9 €/mese) è in arrivo. Lascia l'email: ti avvisiamo noi, con uno sconto per chi si iscrive ora.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+        <input type="email" name="email" placeholder="nome@studio.it" required style="padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;min-width:240px">
+        <input type="hidden" name="piano" value="base">
+        <button class="btn" type="submit">Avvisami</button>
+      </div>
+      <p id="attesa-esito" style="font-size:14px;margin:8px 0 0"></p>
+    </form>
   </section>
 
   <section id="ris">
@@ -137,6 +149,7 @@
       <a class="btn sec" id="dl-csv" href="#">Scarica CSV</a>
       <button class="btn sec" id="nuovo">Converti altri PDF</button>
     </div>
+    <div class="quota" id="quota"></div>
     <div class="filetabs" id="filetabs"></div>
     <div class="tab-wrap" style="margin-top:10px">
       <table>
@@ -195,7 +208,7 @@
   </section>
 </main>
 
-<footer>Quadra · Estratti conto PDF → Excel con quadratura · <a href="mailto:ciao@quadra.app" style="color:var(--muted)">ciao@quadra.app</a></footer>
+<footer><a href="/banche" style="color:var(--muted)">Banche supportate</a> · <a href="/commercialisti" style="color:var(--muted)">Per studi</a><br>Quadra · Estratti conto PDF → Excel con quadratura · <a href="mailto:ciao@quadra.app" style="color:var(--muted)">ciao@quadra.app</a></footer>
 
 <div class="modal" id="modal">
   <form id="form-segnala">
@@ -237,7 +250,9 @@ async function invia(files){
       risultato=j;gruppo=j.token;
     }catch(e){errori.push(f.name+': '+e.message)}
   }
-  if(risultato){mostra(0);stato.className='stato'}
+  if(risultato){mostra(0);stato.className='stato';window.quadraTrack&&quadraTrack('conversione_ok',{n_file:risultato.n_file});
+    const q=document.getElementById('quota');q.textContent=(risultato.pagine_rimaste===null||risultato.pagine_rimaste===undefined)?'':`Piano gratuito: ${risultato.pagine_rimaste} pagine ancora disponibili questo mese su ${risultato.pagine_gratis}.`;
+    if(risultato.pagine_rimaste!==null&&risultato.pagine_rimaste<10)document.getElementById('attesa').style.display='block';}
   if(errori.length){stato.className='stato err';stato.innerHTML='Non sono riuscito a convertire:<br>'+errori.map(esc).join('<br>')}
   else stato.className='stato';
 }
@@ -248,6 +263,7 @@ async function chiama(fd,tentativo=1){
   const testo=await r.text();
   let j=null;try{j=JSON.parse(testo)}catch(_){}
   if(r.ok&&j)return j;
+  if(r.status===402){document.getElementById('attesa').style.display='block';window.quadraTrack&&quadraTrack('limite_raggiunto');throw new Error(j&&j.detail||'Limite gratuito raggiunto')}
   if(j&&j.detail)throw new Error(j.detail);
   if((r.status===502||r.status===503||r.status===504)&&tentativo<3){
     stato.textContent='Il server si sta riavviando, riprovo… ('+tentativo+')';
@@ -283,6 +299,17 @@ function mostra(i){
   if(i===0)document.getElementById('ris').scrollIntoView({behavior:'smooth',block:'start'});
 }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+['dl-xlsx','dl-csv'].forEach(id=>document.getElementById(id).addEventListener('click',()=>{window.quadraTrack&&quadraTrack('download',{tipo:id})}));
+// arrivo da una pagina banca: evidenzia la banca e apre subito il selettore file
+const qs=new URLSearchParams(location.search);
+if(qs.get('banca')){const nome=qs.get('banca').replace(/-/g,' ');document.querySelector('.drop strong').textContent='Trascina qui l\'estratto conto '+nome.replace(/\b\w/g,c=>c.toUpperCase());window.quadraTrack&&quadraTrack('da_pagina_banca',{banca:qs.get('banca')})}
+// lista d'attesa
+document.getElementById('attesa').addEventListener('submit',async e=>{
+  e.preventDefault();const es=document.getElementById('attesa-esito');es.textContent='Invio…';
+  try{const r=await fetch('/api/lista-attesa',{method:'POST',body:new FormData(e.target)});const j=await r.json();
+    if(!r.ok)throw new Error(j.detail||'errore');es.style.color='var(--verde)';es.textContent=j.messaggio;window.quadraTrack&&quadraTrack('lista_attesa');e.target.querySelector('button').disabled=true;
+  }catch(err){es.style.color='var(--rosso)';es.textContent='Non riuscito: '+err.message}
+});
 
 // segnalazione layout
 const modal=document.getElementById('modal');

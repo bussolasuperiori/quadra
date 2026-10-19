@@ -1,6 +1,8 @@
 # Quadra — le uniche cose che toccano a te
 
-> Stato 19/10: sito online su https://quadra-mfai.onrender.com, motore verificato su Intesa e Trade Republic, caricamento multiplo e segnalazione layout attivi. Fase attuale: **validazione con gli studi** (vedi MAIL_COMMERCIALISTI.md). Dominio, pagamenti e P.IVA restano fermi finché non arrivano 2+ risposte positive.
+> Stato 19/10 sera: sito online su https://quadra-mfai.onrender.com. Strategia scelta: **nessun contatto diretto, sponsorizzazione Google Ads + SEO** (vedi PIANO_ADS.md). Il sito misura da solo l'interesse: 30 pagine gratis/mese, poi lista d'attesa. Dominio, pagamenti e P.IVA partono quando la lista d'attesa supera 10 email.
+>
+> Cartella di lavoro: `Desktop\QUADRA` (git). Io modifico e faccio commit lì; Luca fa il push.
 
 Tutto il resto (codice, test, sito, testi, SEO, assistenza) lo gestisco io.
 Ogni voce qui sotto richiede una persona fisica: un account, una firma o un pagamento.
